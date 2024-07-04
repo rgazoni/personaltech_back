@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 datasource db {
@@ -8,9 +9,21 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(cuid())
-  email    String   @unique
+  id       String @id @default(cuid())
+  email    String @unique
   password String
-  cref     String   @unique
+  cref     String @unique
   name     String
+  Page     Page[]
+}
+
+model Page {
+  id        String @id @default(cuid())
+  url       String @unique
+  page_name String
+  user_id   String
+  user      User   @relation(fields: [user_id], references: [id])
+
+  @@index([url])
+  @@index([user_id])
 }
