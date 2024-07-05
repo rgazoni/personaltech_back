@@ -5,8 +5,8 @@ import { PrismaService } from 'src/prisma.service';
 import { CrefModule } from './cref/cref.module';
 
 @Module({
+  imports: [CrefModule],
   controllers: [UsersController],
   providers: [UsersService, PrismaService],
-  imports: [CrefModule]
 })
 export class UsersModule { }

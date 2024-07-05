@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
+import { IsEmail, IsIn, IsNotEmpty, IsString, Length, Matches } from 'class-validator';
+import { TypesCref, TypesCrefPossibilities } from '../cref/types/validate-cref.types';
 
 export class CreateUserDto {
   @IsEmail()
@@ -8,10 +9,9 @@ export class CreateUserDto {
   @IsNotEmpty()
   readonly password: string;
   @IsString()
-  @IsNotEmpty()
-  @Length(11, 11)
+  @Matches(/^\d{6}-(G|PJ)\/[A-Z]{2}$/)
   readonly cref: string;
   @IsString()
-  @IsNotEmpty()
-  readonly name: string;
+  @IsIn(TypesCrefPossibilities)
+  readonly type: TypesCref;
 }

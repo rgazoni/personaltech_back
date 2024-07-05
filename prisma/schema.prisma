@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["omitApi"]
 }
 
@@ -9,21 +9,59 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  password String
-  cref     String @unique
-  name     String
-  Page     Page[]
+  id               String   @id @default(cuid())
+  email            String   @unique
+  password         String
+  cref             String   @unique
+  is_cref_verified CrefOpts @default(pending)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  Page             Page?
+  Cref             Cref?
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  type      String
+  meta      Json
+  createdAt DateTime @default(now())
+  status    String
+}
+
+model Cref {
+  cref         String    @id @unique
+  type         TypesCref
+  name         String
+  company      String
+  state        String
+  city         String
+  address      String
+  neighborhood String
+  zip          String
+  phone        String
+  user_id      String    @unique
+  user         User      @relation(fields: [user_id], references: [id])
 }
 
 model Page {
   id        String @id @default(cuid())
   url       String @unique
   page_name String
-  user_id   String
+  user_id   String @unique
   user      User   @relation(fields: [user_id], references: [id])
 
   @@index([url])
   @@index([user_id])
+}
+
+enum TypesCref {
+  juridical
+  natural
+}
+
+enum CrefOpts {
+  valid
+  invalid
+  already_registered
+  pending
 }

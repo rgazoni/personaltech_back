@@ -1,9 +1,16 @@
 import { Module } from '@nestjs/common';
-import { CrefController } from './cref.controller';
 import { CrefService } from './cref.service';
+import { CrefProcessor } from './processors/cref-validate.processor';
+import { BullModule } from '@nestjs/bull';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
-  controllers: [CrefController],
-  providers: [CrefService]
+  imports: [
+    BullModule.registerQueue({
+      name: 'cref',
+    }),
+  ],
+  providers: [CrefService, CrefProcessor, PrismaService],
+  exports: [CrefService],
 })
-export class CrefModule {}
+export class CrefModule { }
