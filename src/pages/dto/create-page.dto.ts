@@ -3,7 +3,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 export class CreatePageDto {
   @IsString()
   @IsNotEmpty()
-  readonly user_id: string;
+  readonly personal_id: string;
 
   @IsString()
   @IsNotEmpty()

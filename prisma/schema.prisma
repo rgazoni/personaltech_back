@@ -8,28 +8,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Personal {
   id               String   @id @default(cuid())
   email            String   @unique
   password         String
   cref             String   @unique
-  is_cref_verified CrefOpts @default(pending)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
-  Page             Page?
+  is_cref_verified CrefOpts @default(pending)
+  role             Role     @default(personal)
+  uid_chat         String   @default("")
+  city             String    @default("")
+  state            String    @default("")
   Cref             Cref?
+  Page             Page?
+  Ratings          Ratings[]
+}
+
+model Trainee {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  birthdate DateTime
+  role      Role      @default(trainee)
+  full_name String    @default("")
+  avatar    String    @default("")
+  uid_chat  String    @default("")
+  city      String    @default("")
+  state     String    @default("")
+  Ratings   Ratings[]
 }
 
 model Log {
   id        String   @id @default(cuid())
   type      String
-  meta      Json
   createdAt DateTime @default(now())
   status    String
+  meta      Json
 }
 
 model Cref {
-  cref         String    @id @unique
+  cref         String    @id
   type         TypesCref
   name         String
   company      String
@@ -39,19 +60,45 @@ model Cref {
   neighborhood String
   zip          String
   phone        String
-  user_id      String    @unique
-  user         User      @relation(fields: [user_id], references: [id])
+  personal_id  String    @unique
+  personal     Personal  @relation(fields: [personal_id], references: [id])
 }
 
 model Page {
-  id        String @id @default(cuid())
-  url       String @unique
-  page_name String
-  user_id   String @unique
-  user      User   @relation(fields: [user_id], references: [id])
+  id                 String   @id @default(cuid())
+  url                String   @unique
+  page_name          String
+  personal_id        String   @unique
+  about_you          String   @default("")
+  background_color   String   @default("")
+  expertises         String[] @default([])
+  instagram          String   @default("")
+  presentation_video String   @default("")
+  profession         String   @default("")
+  service_value      String   @default("")
+  whatsapp           String   @default("")
+  tiktok             String   @default("")
+  avatar             String   @default("")
+  is_published       Boolean  @default(false)
+  personal           Personal @relation(fields: [personal_id], references: [id])
 
   @@index([url])
-  @@index([user_id])
+  @@index([personal_id])
+}
+
+model Ratings {
+  id             String        @default(cuid())
+  request        RequestStatus @default(ongoing)
+  rating         Int?
+  comment        String?
+  createdAt      DateTime      @default(now())
+  userResponseAt DateTime?
+  personal_id    String
+  personal       Personal      @relation(fields: [personal_id], references: [id])
+  trainee_id     String
+  trainee        Trainee       @relation(fields: [trainee_id], references: [id])
+
+  @@unique([trainee_id, personal_id])
 }
 
 enum TypesCref {
@@ -64,4 +111,16 @@ enum CrefOpts {
   invalid
   already_registered
   pending
+}
+
+enum Role {
+  personal
+  trainee
+}
+
+enum RequestStatus {
+  ongoing
+  pending
+  accepted
+  rejected
 }

@@ -1,14 +1,18 @@
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { PagesModule } from './pages/pages.module';
 import { BullModule } from '@nestjs/bull';
 import { BullBoardService } from './bull-board.service';
+import { PersonalModule } from './personal/personal.module';
+import { RatingsModule } from './ratings/ratings.module';
+import { CometChatModule } from './common/comet-chat/comet-chat.module';
+import { TraineeModule } from './trainee/trainee.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    UsersModule,
+    PersonalModule,
     PagesModule,
     BullModule.forRoot({
       redis: {
@@ -19,6 +23,10 @@ import { BullBoardService } from './bull-board.service';
     BullModule.registerQueue({
       name: 'cref',
     }),
+    RatingsModule,
+    CometChatModule,
+    TraineeModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService, BullBoardService],

@@ -1,6 +1,6 @@
 import { IsString } from "class-validator";
 
-export class UrlDto {
+export class GetCrefDto {
   @IsString()
-  readonly url: string;
+  readonly cref: string;
 }
