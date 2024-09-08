@@ -176,7 +176,7 @@ export class PagesService {
 
         await this.prisma.page.update({
           where: {
-            id: updatePageDto.token,
+            personal_id: personal.id,
           },
           data: {
             avatar_url: url,
@@ -274,12 +274,6 @@ export class PagesService {
       });
     }
 
-    if (gender) {
-      searchConditions.push({
-        gender: gender,
-      });
-    }
-
     // Fetch pages matching the search conditions
     const pages = this.prisma.page.findMany({
       where: {
@@ -320,7 +314,7 @@ export class PagesService {
       return [];
     }
 
-    if (city && state) {
+    if ((city && state) || gender) {
 
       const pagesConsideringCityAndState = pagesResult.filter(page => {
         const personalId = page.personal_id;
@@ -328,8 +322,15 @@ export class PagesService {
         if (!personalInfo) {
           return false;
         }
-        return personalInfo.city === city && personalInfo.state === state;
+        if (city && state && gender)
+          return personalInfo.city === city && personalInfo.state === state && personalInfo.gender === gender
+        if (city && state)
+          return personalInfo.city === city && personalInfo.state === state;
+        if (gender)
+          return personalInfo.gender === gender
       })
+
+
 
       // Process pages to include their associated ratings
       const pagesWithRatings = pagesConsideringCityAndState.map(page => {

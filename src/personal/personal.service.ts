@@ -15,6 +15,7 @@ export class PersonalService {
   ) { }
 
   async create(personal: CreatePersonalDto): Promise<CreatePersonalResponseDto> {
+    console.log(personal);
     try {
       const personal_created = await this.prisma.personal.create({
         omit: {
@@ -26,6 +27,7 @@ export class PersonalService {
           cref: personal.cref,
           state: personal.state,
           city: personal.city,
+          gender: personal.gender
         }
       });
 

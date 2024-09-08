@@ -20,6 +20,7 @@ model Personal {
   uid_chat         String   @default("")
   city             String    @default("")
   state            String    @default("")
+  gender           String    @default("")
   Cref             Cref?
   Page             Page?
   Ratings          Ratings[]

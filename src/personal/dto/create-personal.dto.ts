@@ -32,4 +32,7 @@ export class CreatePersonalDto {
   @IsString()
   @IsNotEmpty()
   readonly city: string;
+  @IsString()
+  @IsNotEmpty()
+  readonly gender: string;
 }

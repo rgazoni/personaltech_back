@@ -21,6 +21,12 @@ export class RatingsController {
     return this.ratingsService.getPersonalRatings(token);
   }
 
+
+  @Get('personal/pending')
+  getPersonalPending(@Param('token') token: string) {
+    return this.ratingsService.getPersonalPending(token);
+  }
+
   @Get('trainee')
   getTraineeRatings(@Param('token') token: string) {
     return this.ratingsService.getTraineeRatings(token);

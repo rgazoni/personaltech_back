@@ -12,4 +12,5 @@ export class CreatePersonalResponseDto implements Omit<Personal, 'password'> {
   readonly city: string;
   readonly state: string;
   readonly role: $Enums.Role;
+  readonly gender: string;
 }

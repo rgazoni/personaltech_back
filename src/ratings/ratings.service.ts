@@ -32,6 +32,38 @@ export class RatingsService {
     }
   }
 
+  async getPersonalPending(token: string) {
+    const ratings = await this.prismaService.ratings.findMany({
+      where: {
+        personal_id: token,
+        request: 'pending'
+      }
+    });
+
+    if (!ratings) {
+      return {
+        status: 500,
+        message: 'Internal Server Error'
+      }
+    }
+
+    const response = await Promise.all(ratings.map(async (rating) => {
+      const trainee = await this.prismaService.trainee.findUnique({
+        where: {
+          id: rating.trainee_id
+        }
+      });
+
+      return {
+        id: trainee.id,
+        full_name: trainee.full_name,
+        avatar: trainee.avatar
+      }
+    }))
+
+    return response
+  }
+
   async getPersonalRatings(token: string) {
     const ratings = await this.prismaService.ratings.findMany({
       where: {
