@@ -7,7 +7,7 @@ import { uuid } from 'uuidv4';
 export class CometChatService {
   constructor(private readonly httpService: HttpService) { }
 
-  async createCometChatUser({ name }: { name: string }): Promise<any> {
+  async createCometChatUser({ name, avatar }: { name: string, avatar: string }): Promise<any> {
     const uuidKey = uuid();
 
     const headers = {
@@ -19,6 +19,7 @@ export class CometChatService {
     const data = {
       uid: uuidKey, // Assuming createPageDto contains uuidKey
       name: name,
+      avatar: avatar,
     };
     const url = 'https://2633795789fab3b8.api-us.cometchat.io/v3/users';
 

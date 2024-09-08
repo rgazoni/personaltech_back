@@ -16,10 +16,13 @@ export class PagesController {
   }
 
   @Get('search')
-  search(@Query() query: SearchDto) {
-    console.log('expertises', query.expertises); // Should now always log an array
+  async search(@Query() query: SearchDto) {
     console.log('search', query.name, query.city, query.state, query.expertises);
-    return this.pagesService.search(query);
+    const data = await this.pagesService.search(query);
+    if (query.rate) {
+      return this.pagesService.sortPagesByRate(data, query.rate);
+    }
+    return data;
   }
 
   @Get(':page')

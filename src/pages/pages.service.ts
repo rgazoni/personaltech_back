@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePageDto } from './dto/create-page.dto';
-import { Prisma } from '@prisma/client';
+import { Personal, Prisma } from '@prisma/client';
 import { handlePrismaKnownError } from 'src/common/util/prisma-error.util';
 import { PrismaService } from 'src/prisma.service';
 import { UrlResponseDto } from './dto/url-response.dto';
 import { UrlDto } from './dto/url.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { CometChatService } from 'src/common/comet-chat/comet-chat.service';
+import { put } from '@vercel/blob';
 
 @Injectable()
 export class PagesService {
@@ -158,9 +159,28 @@ export class PagesService {
         },
       });
 
-      if (!personal.uid_chat || personal.uid_chat === '') {
+      if (!personal.uid_chat || personal.uid_chat === '' && file) {
+
+        // Create a Blob-like object from the file buffer
+        const fileBlob = new Blob([file.buffer], { type: file.mimetype });
+
+        // Upload the file to Vercel Blob Storage
+        const { url } = await put(`personals/${personal.id}/avatar`, fileBlob, {
+          access: 'public', // Optional: set access to public
+        });
+
         const user_response = await this.cometChatService.createCometChatUser({
           name: updatePageDto.page_name,
+          avatar: url
+        });
+
+        await this.prisma.page.update({
+          where: {
+            id: updatePageDto.token,
+          },
+          data: {
+            avatar_url: url,
+          },
         });
 
         await this.prisma.personal.update({
@@ -171,6 +191,7 @@ export class PagesService {
             uid_chat: user_response.uuidKey,
           },
         });
+
       }
 
       if (file) {
@@ -228,7 +249,7 @@ export class PagesService {
   }
 
   async search(query: any) {
-    let { name, city, state, expertises, gender, rate } = query;
+    let { name, city, state, expertises, gender } = query;
 
     const searchConditions: any[] = [];
 
@@ -243,6 +264,7 @@ export class PagesService {
     }
 
     // Add additional conditions (like name, gender, rate, etc.) if provided
+    // COMPLETED
     if (name) {
       searchConditions.push({
         page_name: {
@@ -258,16 +280,6 @@ export class PagesService {
       });
     }
 
-    if (rate) {
-      searchConditions.push({
-        rate: {
-          lte: parseFloat(rate),
-        },
-      });
-    }
-
-    console.log('searchConditions', searchConditions);
-
     // Fetch pages matching the search conditions
     const pages = this.prisma.page.findMany({
       where: {
@@ -278,12 +290,20 @@ export class PagesService {
 
 
     // Fetch personal data if city and state are provided
-    const personal = this.prisma.personal.findMany({
-      where: {
-        city,
-        state,
-      },
-    });
+    let personal: Promise<Personal[]>;
+    if (city && state) {
+      personal = this.prisma.personal.findMany({
+        where: {
+          AND: [
+            { is_cref_verified: 'valid' },
+            { city: city },
+            { state: state }
+          ],
+        },
+      });
+    } else {
+      personal = this.prisma.personal.findMany();
+    }
 
     // Fetch ratings that are 'accepted'
     const ratings = this.prisma.ratings.findMany({
@@ -294,17 +314,63 @@ export class PagesService {
 
     // Resolve all promises (pages, personal, ratings) in parallel
     const [pagesResult, personalResult, ratingsResult] = await Promise.all([pages, personal, ratings]);
-    console.log('search ', pagesResult);
+    console.log('pagesResult', personalResult);
+
+    if (!personalResult.length) {
+      return [];
+    }
+
+    if (city && state) {
+
+      const pagesConsideringCityAndState = pagesResult.filter(page => {
+        const personalId = page.personal_id;
+        const personalInfo = personalResult.find(personal => personal.id === personalId);
+        if (!personalInfo) {
+          return false;
+        }
+        return personalInfo.city === city && personalInfo.state === state;
+      })
+
+      // Process pages to include their associated ratings
+      const pagesWithRatings = pagesConsideringCityAndState.map(page => {
+        const personalId = page.personal_id;
+        const personalInfo = personalResult.find(personal => personal.id === personalId);
+
+        const personalRatings = ratingsResult.filter(rating => rating.personal_id === personalId);
+        const totalRatings = personalRatings.reduce((acc, rating) => acc + rating.rating, 0);
+        const averageRating = personalRatings.length > 0 ? totalRatings / personalRatings.length : 0;
+
+        return {
+          ...page,
+          uid_chat: personalInfo.uid_chat,
+          city: personalInfo.city,
+          state: personalInfo.state,
+          ratings: {
+            total: totalRatings,
+            average: averageRating,
+          },
+        };
+      });
+
+      return pagesWithRatings
+    }
 
     // Process pages to include their associated ratings
     const pagesWithRatings = pagesResult.map(page => {
       const personalId = page.personal_id;
+      const personalInfo = personalResult.find(personal => personal.id === personalId);
+      if (!personalInfo) {
+        return null;
+      }
       const personalRatings = ratingsResult.filter(rating => rating.personal_id === personalId);
       const totalRatings = personalRatings.reduce((acc, rating) => acc + rating.rating, 0);
       const averageRating = personalRatings.length > 0 ? totalRatings / personalRatings.length : 0;
 
       return {
         ...page,
+        uid_chat: personalInfo.uid_chat,
+        city: personalInfo.city,
+        state: personalInfo.state,
         ratings: {
           total: totalRatings,
           average: averageRating,
@@ -315,5 +381,15 @@ export class PagesService {
     return pagesWithRatings;
   }
 
-
+  sortPagesByRate(pages: any[], rate: string) {
+    return pages.sort((a, b) => {
+      if (rate === 'highest_rating') {
+        return b.ratings.average - a.ratings.average;
+      } else if (rate === 'lowest_price') {
+        return a.service_value - b.service_value;
+      } else if (rate === 'most_popular') {
+        return b.ratings.total - a.ratings.total;
+      }
+    });
+  }
 }

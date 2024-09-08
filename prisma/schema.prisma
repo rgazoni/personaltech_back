@@ -38,6 +38,7 @@ model Trainee {
   uid_chat  String    @default("")
   city      String    @default("")
   state     String    @default("")
+  avatar_url String @default("")
   Ratings   Ratings[]
 }
 
@@ -81,6 +82,7 @@ model Page {
   avatar             String   @default("")
   is_published       Boolean  @default(false)
   personal           Personal @relation(fields: [personal_id], references: [id])
+  avatar_url         String   @default("")
 
   @@index([url])
   @@index([personal_id])

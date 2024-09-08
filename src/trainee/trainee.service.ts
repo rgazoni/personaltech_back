@@ -4,6 +4,8 @@ import { CreateTraineeDto } from './dto/create-trainee.dto';
 import { CometChatService } from 'src/common/comet-chat/comet-chat.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateTraineeDto } from './dto/update-trainee.dto';
+import { put } from "@vercel/blob";
+import { createId } from '@paralleldrive/cuid2';
 
 @Injectable()
 export class TraineeService {
@@ -17,8 +19,19 @@ export class TraineeService {
     if (!file)
       throw new Error('Avatar is required');
 
+    const trainee_id = createId();
+
+    // Create a Blob-like object from the file buffer
+    const fileBlob = new Blob([file.buffer], { type: file.mimetype });
+
+    // Upload the file to Vercel Blob Storage
+    const { url } = await put(`trainees/${trainee_id}/avatar`, fileBlob, {
+      access: 'public', // Optional: set access to public
+    });
+
     const response = await this.cometChatService.createCometChatUser({
-      name: createTraineeDto.full_name
+      name: createTraineeDto.full_name,
+      avatar: url,
     });
 
     if (!response)
@@ -28,9 +41,11 @@ export class TraineeService {
 
     const trainee = await this.prismaService.trainee.create({
       data: {
+        id: trainee_id,
         ...createTraineeDto,
         avatar: base64Avatar,
-        uid_chat: response.uuidKey
+        uid_chat: response.uuidKey,
+        avatar_url: url
       }
     });
 
@@ -38,6 +53,7 @@ export class TraineeService {
       throw new Error('Trainee not created');
 
     return trainee;
+
   }
 
   async findQuery(query: string) {
