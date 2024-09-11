@@ -6,6 +6,7 @@ import { GetCrefDto } from './dto/get-cref.dto';
 import { PrismaService } from 'src/prisma.service';
 import { GetCrefResponseDto } from './dto/get-cref-response.dto';
 import { CrefOpts } from '@prisma/client';
+import { RenewCrefDto } from './dto/renew-cref.dto';
 
 @Injectable()
 export class CrefService {
@@ -49,11 +50,11 @@ export class CrefService {
     return response;
   }
 
-  async getStatus(getCrefDto: GetCrefDto) {
+  async getStatus(id: string) {
 
     const personal = await this.prismaService.personal.findUnique({
       where: {
-        cref: getCrefDto.cref,
+        id,
       }
     });
 
@@ -62,7 +63,7 @@ export class CrefService {
     }
 
     if (personal.is_cref_verified === CrefOpts.valid) {
-      const result = await this.getCref(getCrefDto);
+      const result = await this.getCref({ cref: personal.cref });
       return {
         name: result.name,
         status: personal.is_cref_verified,
@@ -71,6 +72,29 @@ export class CrefService {
 
     return {
       status: personal.is_cref_verified,
+    }
+  }
+
+  async renewCref(newCrefDto: RenewCrefDto) {
+    const crefFormatted = newCrefDto.type === 'fisica' ?
+      newCrefDto.cref.slice(0, 6) + '-' + newCrefDto.cref.slice(6, 7) + '/' + newCrefDto.cref.slice(7) :
+      newCrefDto.cref.slice(0, 6) + '-' + newCrefDto.cref.slice(6, 8) + '/' + newCrefDto.cref.slice(8);
+
+    await this.prismaService.personal.update({
+      where: { id: newCrefDto.personal_id },
+      data: {
+        is_cref_verified: 'pending',
+      }
+    });
+
+    await this.validate({
+      cref: crefFormatted,
+      type: newCrefDto.type === 'fisica' ? 'natural' : 'juridical',
+      personal_id: newCrefDto.personal_id,
+    });
+
+    return {
+      message: 'Cref validation requested',
     }
   }
 

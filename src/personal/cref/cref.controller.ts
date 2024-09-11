@@ -1,6 +1,7 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Put, Query } from '@nestjs/common';
 import { GetCrefDto } from './dto/get-cref.dto';
 import { CrefService } from './cref.service';
+import { RenewCrefDto } from './dto/renew-cref.dto';
 
 @Controller('personal/cref')
 export class CrefController {
@@ -12,8 +13,14 @@ export class CrefController {
   }
 
   @Get('status')
-  status(@Query() getCrefDto: GetCrefDto) {
-    return this.crefService.getStatus(getCrefDto);
+  status(@Query('id') id: string) {
+    return this.crefService.getStatus(id);
+  }
+
+  @Put('renew')
+  renew(@Body() renewCrefDto: RenewCrefDto) {
+    console.log(renewCrefDto);
+    return this.crefService.renewCref(renewCrefDto);
   }
 
 }

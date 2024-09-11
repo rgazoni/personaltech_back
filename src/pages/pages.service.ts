@@ -8,6 +8,7 @@ import { UrlDto } from './dto/url.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { CometChatService } from 'src/common/comet-chat/comet-chat.service';
 import { put } from '@vercel/blob';
+import { SortOptsDto } from './dto/sort-opts.dto';
 
 @Injectable()
 export class PagesService {
@@ -392,5 +393,28 @@ export class PagesService {
         return b.ratings.total - a.ratings.total;
       }
     });
+  }
+
+  async rateSort(sortOptsDto: SortOptsDto) {
+    const { personal_id, comments_sort } = sortOptsDto;
+
+    const personal = await this.prisma.page.update({
+      where: {
+        personal_id: personal_id,
+      },
+      data: {
+        comments_sort: comments_sort,
+      },
+    });
+
+    if (!personal) {
+      return {
+        message: 'Personal not found',
+      };
+    }
+
+    return {
+      message: 'Personal updated successfully'
+    };
   }
 }

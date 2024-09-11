@@ -9,15 +9,15 @@ datasource db {
 }
 
 model Personal {
-  id               String   @id @default(cuid())
-  email            String   @unique
+  id               String    @id @default(cuid())
+  email            String    @unique
   password         String
-  cref             String   @unique
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  is_cref_verified CrefOpts @default(pending)
-  role             Role     @default(personal)
-  uid_chat         String   @default("")
+  cref             String    @unique
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  is_cref_verified CrefOpts  @default(pending)
+  role             Role      @default(personal)
+  uid_chat         String    @default("")
   city             String    @default("")
   state            String    @default("")
   gender           String    @default("")
@@ -27,20 +27,20 @@ model Personal {
 }
 
 model Trainee {
-  id        String    @id @default(cuid())
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  birthdate DateTime
-  role      Role      @default(trainee)
-  full_name String    @default("")
-  avatar    String    @default("")
-  uid_chat  String    @default("")
-  city      String    @default("")
-  state     String    @default("")
-  avatar_url String @default("")
-  Ratings   Ratings[]
+  id         String    @id @default(cuid())
+  email      String    @unique
+  password   String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  birthdate  DateTime
+  role       Role      @default(trainee)
+  full_name  String    @default("")
+  avatar     String    @default("")
+  uid_chat   String    @default("")
+  city       String    @default("")
+  state      String    @default("")
+  avatar_url String    @default("")
+  Ratings    Ratings[]
 }
 
 model Log {
@@ -67,23 +67,25 @@ model Cref {
 }
 
 model Page {
-  id                 String   @id @default(cuid())
-  url                String   @unique
+  id                 String     @id @default(cuid())
+  url                String     @unique
   page_name          String
-  personal_id        String   @unique
-  about_you          String   @default("")
-  background_color   String   @default("")
-  expertises         String[] @default([])
-  instagram          String   @default("")
-  presentation_video String   @default("")
-  profession         String   @default("")
-  service_value      String   @default("")
-  whatsapp           String   @default("")
-  tiktok             String   @default("")
-  avatar             String   @default("")
-  is_published       Boolean  @default(false)
-  personal           Personal @relation(fields: [personal_id], references: [id])
-  avatar_url         String   @default("")
+  personal_id        String     @unique
+  about_you          String     @default("")
+  background_color   String     @default("")
+  expertises         String[]   @default([])
+  instagram          String     @default("")
+  presentation_video String     @default("")
+  profession         String     @default("")
+  service_value      String     @default("")
+  whatsapp           String     @default("")
+  tiktok             String     @default("")
+  avatar             String     @default("")
+  is_published       Boolean    @default(false)
+  personal           Personal   @relation(fields: [personal_id], references: [id])
+  avatar_url         String     @default("")
+  comments_sort      String     @default("time_desc")
+  Visitors           Visitors[]
 
   @@index([url])
   @@index([personal_id])
@@ -102,6 +104,16 @@ model Ratings {
   trainee        Trainee       @relation(fields: [trainee_id], references: [id])
 
   @@unique([trainee_id, personal_id])
+}
+
+model Visitors {
+  id               String   @id @default(cuid())
+  visitor_id       String?
+  visitor_type     String?
+  page_id          String
+  createdAt        DateTime @default(now())
+  type             String
+  page             Page     @relation(fields: [page_id], references: [id])
 }
 
 enum TypesCref {

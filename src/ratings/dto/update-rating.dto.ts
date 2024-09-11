@@ -18,7 +18,6 @@ export class UpdateRatingDto {
   readonly request: RequestStatus;
 
   @IsString()
-  @IsNotEmpty()
   readonly comment: string;
 
   @IsDate()

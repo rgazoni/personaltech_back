@@ -5,6 +5,7 @@ import { CreatePageDto } from './dto/create-page.dto';
 import { UpdatePageDto } from './dto/update-page.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { SearchDto } from './dto/search-dto';
+import { SortOptsDto } from './dto/sort-opts.dto';
 
 @Controller('pages')
 export class PagesController {
@@ -49,6 +50,11 @@ export class PagesController {
   @UseInterceptors(FileInterceptor('avatarFile'))
   update(@Body() updatePageDto: UpdatePageDto, @UploadedFile() file: Express.Multer.File) {
     return this.pagesService.update(updatePageDto, file)
+  }
+
+  @Put('rate/sort')
+  rateSort(@Body() sortOptsDto: SortOptsDto) {
+    return this.pagesService.rateSort(sortOptsDto);
   }
 
 }

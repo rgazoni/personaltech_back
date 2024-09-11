@@ -9,6 +9,8 @@ import { RatingsModule } from './ratings/ratings.module';
 import { CometChatModule } from './common/comet-chat/comet-chat.module';
 import { TraineeModule } from './trainee/trainee.module';
 import { AuthModule } from './auth/auth.module';
+import { RedisService } from './redis.service';
+import { VisitorsModule } from './visitors/visitors.module';
 
 @Module({
   imports: [
@@ -27,9 +29,11 @@ import { AuthModule } from './auth/auth.module';
     CometChatModule,
     TraineeModule,
     AuthModule,
+    VisitorsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, BullBoardService],
+  providers: [AppService, BullBoardService, RedisService],
+  exports: [RedisService],
 })
 export class AppModule {
   constructor(private readonly bullBoardService: BullBoardService) { }

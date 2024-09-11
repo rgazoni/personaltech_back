@@ -187,7 +187,7 @@ export class RatingsService {
         personal_id: token
       }
     });
-    console.log(ratings)
+
     if (!ratings) {
       return {
         status: 500,
@@ -210,6 +210,12 @@ export class RatingsService {
       }
     }
 
+    const sortType = await this.prismaService.page.findUnique({
+      where: {
+        personal_id: token
+      }
+    });
+
     const response = trainees.map((trainee) => {
       const rating = ratings.find(rating => rating.trainee_id === trainee.id);
       return {
@@ -219,11 +225,16 @@ export class RatingsService {
         rating: rating.rating,
         comment: rating.comment,
         request: rating.request,
-        userResponseAt: rating.userResponseAt
+        userResponseAt: new Date(rating.userResponseAt)
       }
     })
 
-    console.log(response)
+    if (sortType.comments_sort === 'rate_desc') {
+      response.sort((a, b) => b.rating - a.rating);
+    }
+    if (sortType.comments_sort === 'time_desc') {
+      response.sort((a, b) => b.userResponseAt.getTime() - a.userResponseAt.getTime()); // Compare timestamps
+    }
 
     return response;
   }
