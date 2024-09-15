@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { CreateVisitorDto } from './dto/create-visitor.dto';
 import { VisitorsService } from './visitors.service';
 
@@ -18,7 +18,21 @@ export class VisitorsController {
 
     await this.visitorsService.create(createVisitorDto);
     return { message: 'Visit tracked successfully' };
-
   }
 
+  @Get(':id')
+  async getWeeklyReport(@Param('id') id: string) {
+    return this.visitorsService.getWeeklyReport(id);
+  }
+
+  @Get('age/:id')
+  async getAgeReport(@Param('id') id: string) {
+    return this.visitorsService.getAgeReport(id);
+  }
+
+
+  @Get('regions/:id')
+  async getRegionsReport(@Param('id') id: string) {
+    return this.visitorsService.getRegionsReport(id);
+  }
 }
