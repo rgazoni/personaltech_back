@@ -139,8 +139,6 @@ export class RatingsService {
       }
     });
 
-    console.log(rating)
-
     if (!rating) {
       return {
         status: 500,
@@ -153,7 +151,6 @@ export class RatingsService {
   }
 
   async update(updateRatingDto: UpdateRatingDto) {
-    console.log(updateRatingDto)
     const rating = await this.prismaService.ratings.update({
       where: {
         trainee_id_personal_id: {

@@ -11,6 +11,8 @@ import { TraineeModule } from './trainee/trainee.module';
 import { AuthModule } from './auth/auth.module';
 import { RedisService } from './redis.service';
 import { VisitorsModule } from './visitors/visitors.module';
+import { ScheduleModule } from './schedule/schedule.module';
+import { ClassesModule } from './classes/classes.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { VisitorsModule } from './visitors/visitors.module';
     TraineeModule,
     AuthModule,
     VisitorsModule,
+    ScheduleModule,
+    ClassesModule,
   ],
   controllers: [AppController],
   providers: [AppService, BullBoardService, RedisService],

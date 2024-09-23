@@ -39,6 +39,7 @@ export class CrefProcessor {
           },
         });
       } else {
+        console.log("CREATING CREF");
         await this.prismaService.cref.create({
           data: cref_data,
         });
@@ -54,6 +55,7 @@ export class CrefProcessor {
       });
 
     } catch (error) {
+      console.error("IT FAILED", error);
       await this.prismaService.log.create({
         data: {
           type: 'cref.validation_queue',

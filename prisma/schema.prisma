@@ -24,6 +24,9 @@ model Personal {
   Cref             Cref?
   Page             Page?
   Ratings          Ratings[]
+  Classes    Classes[]
+  availabilityRules AvailabilityRule[] // Relation to AvailabilityRule
+  bookings          Booking[]          // Relation to Booking
 }
 
 model Trainee {
@@ -41,6 +44,8 @@ model Trainee {
   state      String    @default("")
   avatar_url String    @default("")
   Ratings    Ratings[]
+  Classes    Classes[]
+  bookings Booking[] // Relation to Booking
 }
 
 model Log {
@@ -106,6 +111,17 @@ model Ratings {
   @@unique([trainee_id, personal_id])
 }
 
+model Classes {
+  id             String      @id @default(cuid())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  status         ClassesStatus @default(pending) // Enum to track the status (pending, accepted, rejected)
+  personal_id    String
+  trainee_id     String
+  personal       Personal    @relation(fields: [personal_id], references: [id])
+  trainee        Trainee     @relation(fields: [trainee_id], references: [id])
+}
+
 model Visitors {
   id               String   @id @default(cuid())
   visitor_id       String?
@@ -114,6 +130,31 @@ model Visitors {
   createdAt        DateTime @default(now())
   type             String
   page             Page     @relation(fields: [page_id], references: [id])
+}
+
+model AvailabilityRule {
+  id              String         @id @default(uuid())
+  personal        Personal   @relation(fields: [personal_id], references: [id])
+  personal_id     String
+  startTime       String         // Time in 'HH:MM:SS' format
+  endTime         String         // Time in 'HH:MM:SS' format
+  daysOfWeek      Int[]          // Array of integers (0=Sunday, ..., 6=Saturday)
+}
+
+model Booking {
+  id              String         @id @default(uuid())
+  personal        Personal       @relation(fields: [personal_id], references: [id])
+  personal_id     String
+  trainee         Trainee       @relation(fields: [trainee_id], references: [id])
+  trainee_id      String
+  startDatetime   DateTime
+  endDatetime     DateTime
+  status          BookingStatus
+}
+
+enum BookingStatus {
+  booked
+    cancelled
 }
 
 enum TypesCref {
@@ -138,4 +179,12 @@ enum RequestStatus {
   pending
   accepted
   rejected
+}
+
+enum ClassesStatus {
+  pending
+  accepted
+  rejected
+  finished
+  done
 }

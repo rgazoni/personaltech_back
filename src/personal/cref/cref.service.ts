@@ -20,8 +20,8 @@ export class CrefService {
       personal_id: validate.personal_id,
     },
       {
-        timeout: 120000,
-        attempts: 3, // Retry failed jobs up to 3 times
+        timeout: 240000,
+        attempts: 1, // Retry failed jobs up to 3 times
       }
     );
   }
