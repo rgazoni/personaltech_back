@@ -36,6 +36,6 @@ export class ClassesController {
   @Put('update')
   update(@Body() updateClass: Partial<Classes>) {
     console.log(updateClass);
-    return this.classesService.update(updateClass.id, updateClass.status);
+    return this.classesService.update(updateClass.id, updateClass.status, updateClass.elapsed_time);
   }
 }

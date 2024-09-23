@@ -101,10 +101,14 @@ export class ClassesService {
     return cl;
   }
 
-  async update(class_id: string, newStatus: ClassesStatus) {
+  async update(class_id: string, newStatus: ClassesStatus, elapsed_time: number) {
+    const classToUpdate = await this.prismaService.classes.findUnique({
+      where: { id: class_id },
+    });
+
     const updatedClass = await this.prismaService.classes.update({
       where: { id: class_id },
-      data: { status: newStatus },
+      data: { status: newStatus, elapsed_time: classToUpdate.elapsed_time + elapsed_time },
     });
 
     if (newStatus === 'finished') {

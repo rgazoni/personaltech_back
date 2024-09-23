@@ -80,6 +80,52 @@ export class VisitorsService {
     }));
   }
 
+  async getGenderReport(trainerId: string) {
+    const users = await this.prismaService.visitors.findMany({
+      where: {
+        page_id: trainerId,
+        type: 'visit',
+        visitor_type: 'trainee',
+      },
+      select: {
+        visitor_id: true,
+      }
+    });
+
+    if (!users || users.length === 0) {
+      throw new Error('No visitors found for the trainer');
+    }
+
+    const userIds = users.map(user => user.visitor_id);
+
+    const genderReport = await this.prismaService.trainee.findMany({
+      where: {
+        id: {
+          in: userIds,
+        }
+      },
+      select: {
+        gender: true,
+      }
+    });
+
+    if (!genderReport || genderReport.length === 0) {
+      throw new Error('No trainees found for the trainer');
+    }
+
+    const genderGroups = [
+      { gender: "Masculino", abrv: 'M', visitors: 0, fill: "#0E6B2E" },
+      { gender: "Feminino", abrv: 'F', visitors: 0, fill: "#113B1D" },
+      { gender: "Não binário", abrv: 'NB', visitors: 0, fill: "#0B8636" },
+    ];
+
+    genderReport.forEach(report => {
+      genderGroups.find(group => group.abrv === report.gender).visitors++;
+    });
+
+    return genderGroups;
+  }
+
   async getAgeReport(trainerId: string) {
 
     const users = await this.prismaService.visitors.findMany({
@@ -191,5 +237,19 @@ export class VisitorsService {
       }
     });
     return regions;
+  }
+
+  async getHoursReport(trainerId: string) {
+    const minutes = await this.prismaService.classes.findMany({
+      where: {
+        personal_id: trainerId,
+        status: 'finished',
+      },
+    });
+    if (!minutes) {
+      throw new Error('No classes found for the trainer');
+    }
+    const sum = minutes.reduce((acc, curr) => acc + curr.elapsed_time, 0);
+    return { elapsed_time: sum };
   }
 }

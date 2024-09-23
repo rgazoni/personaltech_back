@@ -37,6 +37,7 @@ model Trainee {
   updatedAt  DateTime  @updatedAt
   birthdate  DateTime
   role       Role      @default(trainee)
+  gender     String    @default("")
   full_name  String    @default("")
   avatar     String    @default("")
   uid_chat   String    @default("")
@@ -118,6 +119,7 @@ model Classes {
   status         ClassesStatus @default(pending) // Enum to track the status (pending, accepted, rejected)
   personal_id    String
   trainee_id     String
+  elapsed_time   Int         @default(0)
   personal       Personal    @relation(fields: [personal_id], references: [id])
   trainee        Trainee     @relation(fields: [trainee_id], references: [id])
 }

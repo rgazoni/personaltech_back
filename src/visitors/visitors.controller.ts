@@ -30,9 +30,19 @@ export class VisitorsController {
     return this.visitorsService.getAgeReport(id);
   }
 
+  @Get('gender/:id')
+  async getGenderReport(@Param('id') id: string) {
+    return this.visitorsService.getGenderReport(id);
+  }
+
 
   @Get('regions/:id')
   async getRegionsReport(@Param('id') id: string) {
     return this.visitorsService.getRegionsReport(id);
+  }
+
+  @Get('hours/:id')
+  async getHoursReport(@Param('id') id: string) {
+    return this.visitorsService.getHoursReport(id);
   }
 }

@@ -24,4 +24,8 @@ export class CreateTraineeDto {
   @IsString()
   @IsNotEmpty()
   readonly state: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly gender: string;
 }
