@@ -66,4 +66,22 @@ export class PersonalService {
     return user;
   }
 
+  async schedulePersonal(token: string, schedule: string): Promise<Omit<Personal, 'password'>> {
+    const user = await this.prisma.personal.update({
+      omit: {
+        password: true,
+      },
+      where: {
+        id: token,
+      },
+      data: {
+        scheduling_system: schedule,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException(`User #${token} not found`);
+    }
+    return user;
+  }
+
 }

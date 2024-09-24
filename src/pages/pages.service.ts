@@ -125,6 +125,7 @@ export class PagesService {
       uid_chat: personal.uid_chat,
       city: personal.city,
       state: personal.state,
+      scheduling_system: personal.scheduling_system,
       ratings: {
         total,
         average,

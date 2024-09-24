@@ -21,6 +21,7 @@ model Personal {
   city             String    @default("")
   state            String    @default("")
   gender           String    @default("")
+  scheduling_system String    @default("No")
   Cref             Cref?
   Page             Page?
   Ratings          Ratings[]

@@ -101,7 +101,7 @@ export class ClassesService {
     return cl;
   }
 
-  async update(class_id: string, newStatus: ClassesStatus, elapsed_time: number) {
+  async update(class_id: string, newStatus: ClassesStatus, elapsed_time = 0) {
     const classToUpdate = await this.prismaService.classes.findUnique({
       where: { id: class_id },
     });
@@ -112,6 +112,7 @@ export class ClassesService {
     });
 
     if (newStatus === 'finished') {
+      console.log('Creating rating for trainee');
       await this.prismaService.ratings.create({
         data: {
           trainee_id: updatedClass.trainee_id,

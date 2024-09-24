@@ -146,6 +146,24 @@ export class ScheduleService {
 
     // Transaction to ensure atomicity
     const booking = await this.prisma.$transaction(async (prisma) => {
+      // Validate personal_id
+      const personal = await prisma.personal.findUnique({
+        where: { id: personal_id },
+      });
+
+      if (!personal) {
+        throw new BadRequestException('Invalid personal ID.');
+      }
+
+      // Validate trainee_id
+      const trainee = await prisma.trainee.findUnique({
+        where: { id: trainee_id },
+      });
+
+      if (!trainee) {
+        throw new BadRequestException('Invalid trainee ID.');
+      }
+
       // Check if the time slot is available
       const existingBooking = await prisma.booking.findFirst({
         where: {
@@ -176,6 +194,7 @@ export class ScheduleService {
     return booking;
   }
 
+
   // Get bookings for a professional
   async getBookings(personal_id: string) {
     const bookings = await this.prisma.booking.findMany({
@@ -190,8 +209,30 @@ export class ScheduleService {
         startDatetime: 'asc',
       },
     });
+    console.log(bookings);
 
     return bookings;
+  }
+
+  // Delete a booking
+  async deleteBooking(booking_id: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: booking_id },
+    });
+
+    if (!booking) {
+      throw new BadRequestException('Booking not found.');
+    }
+
+    if (booking.status !== 'booked') {
+      throw new BadRequestException('Booking is not confirmed.');
+    }
+
+    await this.prisma.booking.delete({
+      where: { id: booking_id },
+    });
+
+    return booking;
   }
 }
 
