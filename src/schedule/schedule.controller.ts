@@ -92,5 +92,15 @@ export class ScheduleController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
+
+  @Get('trainee')
+  async getTraineeSchedules(@Query('token') token: string) {
+    try {
+      const schedules = await this.scheduleService.getTraineeSchedule(token);
+      return schedules;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
 }
 

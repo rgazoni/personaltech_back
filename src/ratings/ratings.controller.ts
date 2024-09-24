@@ -33,8 +33,8 @@ export class RatingsController {
   }
 
   @Delete('delete')
-  delete(@Query('personal_id') personal_id: string, @Query('trainee_id') trainee_id: string) {
-    return this.ratingsService.delete(personal_id, trainee_id);
+  delete(@Query('id') id: string) {
+    return this.ratingsService.delete(id);
   }
 
   @Put('update')

@@ -87,7 +87,8 @@ export class RatingsService {
       });
 
       return {
-        id: trainee.id,
+        rating_id: rating.id,
+        trainee_id: trainee.id,
         full_name: trainee.full_name,
         avatar: trainee.avatar
       }
@@ -119,7 +120,8 @@ export class RatingsService {
       });
 
       return {
-        id: personal.personal_id,
+        rating_id: rating.id,
+        personal_id: personal.personal_id,
         page_name: personal.page_name,
         url: personal.url,
         avatar: personal.avatar
@@ -129,13 +131,10 @@ export class RatingsService {
     return response
   }
 
-  async delete(personal_id: string, trainee_id: string) {
+  async delete(id: string) {
     const rating = await this.prismaService.ratings.delete({
       where: {
-        trainee_id_personal_id: {
-          trainee_id,
-          personal_id,
-        }
+        id: id
       }
     });
 
@@ -147,16 +146,12 @@ export class RatingsService {
     }
 
     return rating
-
   }
 
   async update(updateRatingDto: UpdateRatingDto) {
     const rating = await this.prismaService.ratings.update({
       where: {
-        trainee_id_personal_id: {
-          trainee_id: updateRatingDto.trainee_id,
-          personal_id: updateRatingDto.personal_id
-        },
+        id: updateRatingDto.id
       },
       data: {
         rating: updateRatingDto.rating,
@@ -177,13 +172,14 @@ export class RatingsService {
   }
 
   async info(status: RequestStatus, token: string) {
-    console.log(status, token)
     const ratings = await this.prismaService.ratings.findMany({
       where: {
         request: status,
         personal_id: token
       }
     });
+
+    console.log(ratings)
 
     if (!ratings) {
       return {
@@ -213,9 +209,11 @@ export class RatingsService {
       }
     });
 
-    const response = trainees.map((trainee) => {
-      const rating = ratings.find(rating => rating.trainee_id === trainee.id);
+
+    const response = ratings.map((rating) => {
+      const trainee = trainees.find(trainee => trainee.id === rating.trainee_id);
       return {
+        id: rating.id,
         trainee_id: trainee.id,
         full_name: trainee.full_name,
         avatar: trainee.avatar,
@@ -239,10 +237,7 @@ export class RatingsService {
   async updateRequest(updateRequestDto: UpdateRequestDto) {
     const rating = await this.prismaService.ratings.update({
       where: {
-        trainee_id_personal_id: {
-          trainee_id: updateRequestDto.trainee_id,
-          personal_id: updateRequestDto.personal_id
-        }
+        id: updateRequestDto.id
       },
       data: {
         request: updateRequestDto.request

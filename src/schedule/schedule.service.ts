@@ -234,5 +234,42 @@ export class ScheduleService {
 
     return booking;
   }
+
+  async getTraineeSchedule(trainee_id: string) {
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        trainee_id,
+        status: 'booked',
+      },
+      include: {
+        personal: true,
+      },
+      orderBy: {
+        startDatetime: 'asc',
+      },
+    });
+    const ids = bookings.map((booking) => booking.personal_id);
+    const professionals = await this.prisma.page.findMany({
+      where: {
+        personal_id: {
+          in: ids,
+        },
+      },
+    });
+
+    console.log(professionals);
+
+    const schedule = bookings.map((booking) => {
+      const professional = professionals.find(
+        (prof) => prof.personal_id === booking.personal_id,
+      );
+      return {
+        booking,
+        professional,
+      };
+    });
+
+    return schedule;
+  }
 }
 

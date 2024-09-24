@@ -4,11 +4,7 @@ import { IsDate, IsNotEmpty, IsString } from "class-validator";
 export class UpdateRatingDto {
   @IsString()
   @IsNotEmpty()
-  readonly trainee_id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  readonly personal_id: string;
+  readonly id: string;
 
   @IsNotEmpty()
   readonly rating: number;
