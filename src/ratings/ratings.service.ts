@@ -174,6 +174,13 @@ export class RatingsService {
       }
     });
 
+    //Add a new notification to the queue for the trainee to be notified of the rating update
+    await this.notificationService.traineeCommented({
+      trainee_id: rating.trainee_id,
+      personal_id: rating.personal_id,
+      rating_id: rating.id,
+    });
+
     if (!rating) {
       return {
         status: 500,
@@ -191,8 +198,6 @@ export class RatingsService {
         personal_id: token
       }
     });
-
-    console.log(ratings)
 
     if (!ratings) {
       return {

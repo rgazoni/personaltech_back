@@ -3,10 +3,14 @@ import { PrismaService } from '../prisma.service'; // Assuming you have a Prisma
 import { addHours, isBefore, parseISO, format } from 'date-fns';
 import { CreateAvailabilityDto } from './dto/create-availability.dto';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { NotificationService } from 'src/common/notification/notification.service';
 
 @Injectable()
 export class ScheduleService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService,
+  ) { }
 
   // Create an availability rule
   async createAvailabilityRule(createAvailabilityDto: CreateAvailabilityDto) {
@@ -188,6 +192,15 @@ export class ScheduleService {
         },
       });
 
+      //Notification for new schedule
+      await this.notificationService.newScheduling({
+        personal_id,
+        startTime: format(startTime, 'HH:mm:ss'),
+        endTime: format(endTime, 'HH:mm:ss'),
+        trainee_id,
+        schedule_id: newBooking.id,
+      });
+
       return newBooking;
     });
 
@@ -209,7 +222,6 @@ export class ScheduleService {
         startDatetime: 'asc',
       },
     });
-    console.log(bookings);
 
     return bookings;
   }
@@ -233,6 +245,12 @@ export class ScheduleService {
     });
 
     //Notify deletion
+    await this.notificationService.cancelScheduling({
+      trainee_id: booking.trainee_id,
+      personal_id: booking.personal_id,
+      schedule_id: booking_id,
+      type: requested_by,
+    });
 
     return booking;
   }
@@ -258,8 +276,6 @@ export class ScheduleService {
         },
       },
     });
-
-    console.log(professionals);
 
     const schedule = bookings.map((booking) => {
       const professional = professionals.find(

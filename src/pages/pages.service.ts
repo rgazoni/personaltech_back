@@ -310,7 +310,6 @@ export class PagesService {
 
     // Resolve all promises (pages, personal, ratings) in parallel
     const [pagesResult, personalResult, ratingsResult] = await Promise.all([pages, personal, ratings]);
-    console.log('pagesResult', personalResult);
 
     if (!personalResult.length) {
       return [];

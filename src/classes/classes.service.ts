@@ -12,11 +12,9 @@ export class ClassesService {
   ) { }
 
   async create(createClassDto: CreateClassDto) {
-    console.log(createClassDto);
     const cl = await this.prismaService.classes.create({
       data: createClassDto,
     });
-    console.log(cl);
     await this.notificationService.newClass(createClassDto.trainee_id, createClassDto.personal_id, cl.id);
     return cl;
   }

@@ -73,8 +73,6 @@ export class ScheduleController {
   @Delete('bookings')
   async deleteBooking(@Query('booking_id') booking_id: string, @Query('requested_by') requested_by: string) {
     try {
-      console.log(booking_id);
-      console.log(requested_by);
       const booking = await this.scheduleService.deleteBooking(booking_id, requested_by);
       return booking;
     } catch (error) {
@@ -86,9 +84,7 @@ export class ScheduleController {
   @Get('bookings/:personal_id')
   async getBookings(@Param('personal_id') personal_id: string) {
     try {
-      console.log(personal_id);
       const bookings = await this.scheduleService.getBookings(personal_id);
-      console.log(bookings);
       return bookings;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

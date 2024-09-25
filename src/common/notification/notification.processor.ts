@@ -6,6 +6,8 @@ import { NewClassEvent } from './events/new-class.event';
 import { CancelRatingEvent } from './events/cancel-rating';
 import { CancelClassEvent } from './events/cancel-class';
 import { CancelScheduleEvent } from './events/cancel-schedule';
+import { NewScheduleEvent } from './events/new-schedule.event';
+import { TraineeCommentedEvent } from './events/trainee-commented.event';
 
 @Processor('notification')
 export class NotificationProcessor {
@@ -201,6 +203,35 @@ export class NotificationProcessor {
     console.log('Notification created:', notification);
   }
 
+  @Process('new_schedule')
+  async newSchedule(job: Job<NewScheduleEvent>) {
+    const { personal_id, endTime, startTime, trainee_id, schedule_id } = job.data;
+
+    const trainee = await this.prismaService.trainee.findUnique({
+      where: {
+        id: trainee_id
+      }
+    });
+
+    if (!trainee) {
+      console.error('Trainee not found');
+      return;
+    }
+
+    const notification = await this.prismaService.notification.create({
+      data: {
+        type: 'new_schedule',
+        message: `${trainee.full_name} agendou uma aula com você às ${startTime} até ${endTime}`,
+        person_id: personal_id,
+        person_type: 'personal',
+        reference_id: schedule_id
+      }
+    });
+
+    console.log('Notification created:', notification);
+  }
+
+
   @Process('cancel_schedule')
   async cancelSchedule(job: Job<CancelScheduleEvent>) {
     const { schedule_id, personal_id, trainee_id, type } = job.data;
@@ -265,6 +296,34 @@ export class NotificationProcessor {
     });
 
     console.log('Notification created:', notification);
+  }
+
+  @Process('trainee_commented')
+  async traineeCommented(job: Job<TraineeCommentedEvent>) {
+    const { trainee_id, personal_id, rating_id } = job.data;
+
+    const trainee = await this.prismaService.trainee.findUnique({
+      where: {
+        id: trainee_id
+      }
+    });
+
+    if (!trainee) {
+      console.error('Trainee not found');
+      return;
+    }
+
+    const notification = await this.prismaService.notification.create({
+      data: {
+        type: 'trainee_commented',
+        message: `${trainee.full_name} comentou sobre sua aula`,
+        person_id: personal_id,
+        person_type: 'personal',
+        reference_id: rating_id
+      }
+    });
+
+    console.log('Trainee commented:', notification);
   }
 }
 

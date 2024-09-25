@@ -19,7 +19,6 @@ export class CrefController {
 
   @Put('renew')
   renew(@Body() renewCrefDto: RenewCrefDto) {
-    console.log(renewCrefDto);
     return this.crefService.renewCref(renewCrefDto);
   }
 
