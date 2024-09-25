@@ -153,6 +153,17 @@ model Booking {
   status          BookingStatus
 }
 
+model Notification {
+  id              String         @id @default(uuid())
+  createdAt       DateTime       @default(now())
+  person_id       String
+  person_type     String
+  message         String
+  read            Boolean        @default(false)
+  type            String
+  reference_id    String         @default("")
+}
+
 enum BookingStatus {
   booked
     cancelled

@@ -70,10 +70,12 @@ export class ScheduleController {
     }
   }
 
-  @Delete('bookings/:booking_id')
-  async deleteBooking(@Param('booking_id') booking_id: string) {
+  @Delete('bookings')
+  async deleteBooking(@Query('booking_id') booking_id: string, @Query('requested_by') requested_by: string) {
     try {
-      const booking = await this.scheduleService.deleteBooking(booking_id);
+      console.log(booking_id);
+      console.log(requested_by);
+      const booking = await this.scheduleService.deleteBooking(booking_id, requested_by);
       return booking;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);

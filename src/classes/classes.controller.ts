@@ -18,9 +18,8 @@ export class ClassesController {
   }
 
   @Delete('delete')
-  delete(@Query('class_id') class_id: string) {
-    console.log(class_id);
-    return this.classesService.delete(class_id);
+  delete(@Query('class_id') class_id: string, @Query('requested_by') requested_by: string) {
+    return this.classesService.delete(class_id, requested_by);
   }
 
   @Get('trainee')

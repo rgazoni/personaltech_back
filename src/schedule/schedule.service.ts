@@ -215,7 +215,7 @@ export class ScheduleService {
   }
 
   // Delete a booking
-  async deleteBooking(booking_id: string) {
+  async deleteBooking(booking_id: string, requested_by: string) {
     const booking = await this.prisma.booking.findUnique({
       where: { id: booking_id },
     });
@@ -231,6 +231,8 @@ export class ScheduleService {
     await this.prisma.booking.delete({
       where: { id: booking_id },
     });
+
+    //Notify deletion
 
     return booking;
   }

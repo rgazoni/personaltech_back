@@ -2,15 +2,23 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { ClassesStatus } from '@prisma/client';
+import { NotificationService } from 'src/common/notification/notification.service';
 
 @Injectable()
 export class ClassesService {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly notificationService: NotificationService
+  ) { }
 
-  create(createClassDto: CreateClassDto) {
-    return this.prismaService.classes.create({
+  async create(createClassDto: CreateClassDto) {
+    console.log(createClassDto);
+    const cl = await this.prismaService.classes.create({
       data: createClassDto,
     });
+    console.log(cl);
+    await this.notificationService.newClass(createClassDto.trainee_id, createClassDto.personal_id, cl.id);
+    return cl;
   }
 
   async getPersonalClasses(token: string) {
@@ -84,7 +92,7 @@ export class ClassesService {
     return response;
   }
 
-  async delete(class_id: string) {
+  async delete(class_id: string, requested_by: string) {
     const cl = await this.prismaService.classes.delete({
       where: {
         id: class_id,
@@ -98,6 +106,14 @@ export class ClassesService {
       };
     }
 
+    // Cancel notification
+    await this.notificationService.cancelClass({
+      trainee_id: cl.trainee_id,
+      personal_id: cl.personal_id,
+      class_id: cl.id,
+      type: requested_by,
+    });
+
     return cl;
   }
 
@@ -110,6 +126,16 @@ export class ClassesService {
       where: { id: class_id },
       data: { status: newStatus, elapsed_time: classToUpdate.elapsed_time + elapsed_time },
     });
+
+    // If newStatus is rejected the only way is the trainee reject the class, so lets already do the notification for personal
+    if (newStatus === 'rejected') {
+      await this.notificationService.cancelClass({
+        trainee_id: updatedClass.trainee_id,
+        personal_id: updatedClass.personal_id,
+        class_id: updatedClass.id,
+        type: 'trainee',
+      });
+    }
 
     if (newStatus === 'finished') {
       console.log('Creating rating for trainee');

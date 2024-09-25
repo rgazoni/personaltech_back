@@ -13,6 +13,7 @@ import { RedisService } from './redis.service';
 import { VisitorsModule } from './visitors/visitors.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { ClassesModule } from './classes/classes.module';
+import { NotificationModule } from './common/notification/notification.module';
 
 @Module({
   imports: [
@@ -34,8 +35,9 @@ import { ClassesModule } from './classes/classes.module';
     VisitorsModule,
     ScheduleModule,
     ClassesModule,
+    NotificationModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController], 
   providers: [AppService, BullBoardService, RedisService],
   exports: [RedisService],
 })

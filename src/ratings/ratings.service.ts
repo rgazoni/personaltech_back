@@ -4,13 +4,15 @@ import { CreateRatingDto } from './dto/create-rating.dto';
 import { UpdateRatingDto } from './dto/update-rating.dto';
 import { RequestStatus } from '@prisma/client';
 import { UpdateRequestDto } from './dto/update-request.dto';
+import { NotificationService } from 'src/common/notification/notification.service';
 
 @Injectable()
 export class RatingsService {
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly notificationService: NotificationService
   ) { }
-
+  //Creates a new rating
   async create(createRatingDto: CreateRatingDto) {
 
     const rating = await this.prismaService.ratings.create({
@@ -19,6 +21,9 @@ export class RatingsService {
         personal_id: createRatingDto.personal_id,
       }
     });
+
+    //Add a new notification to the queue for the trainee to be notified of the new rating proposal
+    await this.notificationService.newRating(createRatingDto.trainee_id, createRatingDto.personal_id, rating.id);
 
     if (!rating) {
       return {
@@ -131,7 +136,7 @@ export class RatingsService {
     return response
   }
 
-  async delete(id: string) {
+  async delete(id: string, requested_by: string) {
     const rating = await this.prismaService.ratings.delete({
       where: {
         id: id
@@ -144,6 +149,14 @@ export class RatingsService {
         message: 'Internal Server Error'
       }
     }
+
+    //Add a new notification to the queue for the trainee to be notified of the rating cancellation
+    await this.notificationService.cancelRating({
+      trainee_id: rating.trainee_id,
+      personal_id: rating.personal_id,
+      type: requested_by,
+      rating_id: rating.id
+    });
 
     return rating
   }
