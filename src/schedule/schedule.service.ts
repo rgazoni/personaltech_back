@@ -244,6 +244,16 @@ export class ScheduleService {
       where: { id: booking_id },
     });
 
+    //TODO: If the class was cancelled before one hour, the trainee could comment oportunities 
+    const classDate = new Date(booking.startDatetime);
+    const now = new Date();
+    console.log(now.getTime() - classDate.getTime());
+    const elapsed_time = now.getTime() - classDate.getTime();
+    if (elapsed_time < 3600000) {
+      // Send notification to trainee
+      // Create a rating opportunity
+    }
+
     //Notify deletion
     await this.notificationService.cancelScheduling({
       trainee_id: booking.trainee_id,
