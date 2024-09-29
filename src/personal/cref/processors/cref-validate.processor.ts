@@ -22,11 +22,30 @@ export class CrefProcessor {
         personal_id,
       };
 
-      const cref_data_exists = await this.prismaService.cref.findUnique({
+      //Verify if cref is already in the database
+
+      const cref_exists = await this.prismaService.cref.findUnique({
+        where: { cref: cref },
+      });
+
+      if (cref_exists) {
+        await this.prismaService.personal.update({
+          where: { id: personal_id },
+          data: {
+            is_cref_verified: 'already_registered',
+            cref
+          },
+        });
+        return
+      }
+
+      // If the personal data exists, update it, otherwise create it
+
+      const personal_data_exists = await this.prismaService.cref.findUnique({
         where: { personal_id: personal_id },
       });
 
-      if (cref_data_exists) {
+      if (personal_data_exists) {
         await this.prismaService.cref.update({
           where: { personal_id: personal_id },
           data: cref_data,
@@ -42,6 +61,13 @@ export class CrefProcessor {
         console.log("CREATING CREF");
         await this.prismaService.cref.create({
           data: cref_data,
+        });
+        await this.prismaService.personal.update({
+          where: { id: personal_id },
+          data: {
+            is_cref_verified: 'valid',
+            cref
+          },
         });
       }
 

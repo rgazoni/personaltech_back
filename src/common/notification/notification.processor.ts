@@ -269,6 +269,18 @@ export class NotificationProcessor {
       }
       message = `${professional.page_name} cancelou a aula`
       person_type = 'trainee';
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          type: 'cancel_schedule',
+          message: message,
+          person_id: trainee_id,
+          person_type: person_type,
+          reference_id: schedule_id
+        }
+      });
+      console.log('Notification created:', notification);
+
     } else if (type === 'trainee') {
       const trainee = await this.prismaService.trainee.findUnique({
         where: {
@@ -283,19 +295,18 @@ export class NotificationProcessor {
 
       message = `${trainee.full_name} optou por cancelar a aula`;
       person_type = 'personal';
+
+      const notification = await this.prismaService.notification.create({
+        data: {
+          type: 'cancel_schedule',
+          message: message,
+          person_id: personal_id,
+          person_type: person_type,
+          reference_id: schedule_id
+        }
+      });
+      console.log('Notification created:', notification);
     }
-
-    const notification = await this.prismaService.notification.create({
-      data: {
-        type: 'cancel_schedule',
-        message: message,
-        person_id: trainee_id,
-        person_type: person_type,
-        reference_id: schedule_id
-      }
-    });
-
-    console.log('Notification created:', notification);
   }
 
   @Process('trainee_commented')
